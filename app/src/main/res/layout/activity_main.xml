@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+    >
+	<RelativeLayout
+	    android:id="@+id/layout"
+	    android:layout_width="fill_parent"
+	    android:layout_height="250dp">
+	</RelativeLayout>
+
+	<TextView android:text="Color Name" android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:singleLine="false"
+	    android:id="@+id/tv_color_name"
+	    android:gravity="center" />
+	<TextView android:text="Color HEX" android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="false"
+        android:id="@+id/tv_color_HEX"
+        android:gravity="center" />
+    <TextView android:text="Color RGB" android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="false"
+        android:id="@+id/tv_color_RGB"
+        android:gravity="center" />
+  <Button
+    android:id="@+id/button_capture"
+    android:text="拍照"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    />
+</LinearLayout>
