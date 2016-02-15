@@ -20,18 +20,13 @@ public class ResizableCameraPreview extends CameraPreview implements PreviewCall
     private int[] pixels;
     private MainActivity  mainActivity;
     private Parameters parameters;
-    // this variable stores the camera preview size
     private Size previewSize;
-    private int parentWidth,parentHeight;
 
     public ResizableCameraPreview(Activity activity, int cameraId, LayoutMode mode, boolean addReversedSizes) {
         super(activity, cameraId, mode);
         mainActivity=(MainActivity) activity;
-        parentWidth=100;
-        parentHeight=100;
-        pixels = new int[parentWidth * parentHeight];
+        pixels = new int[0];
         mCamera.setPreviewCallback(this);
-
         if (addReversedSizes) {
             List<Camera.Size> sizes = mPreviewSizeList;
             int length = sizes.size();
@@ -47,10 +42,8 @@ public class ResizableCameraPreview extends CameraPreview implements PreviewCall
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         mCamera.stopPreview();
         super.setPreviewCallback(this);
-
         Camera.Parameters cameraParams = mCamera.getParameters();
         boolean portrait = isPortrait();
-
         if (!mSurfaceConfiguring) {
             Camera.Size previewSize = determinePreviewSize(portrait, width, height);
             Camera.Size pictureSize = determinePictureSize(previewSize);
@@ -62,13 +55,11 @@ public class ResizableCameraPreview extends CameraPreview implements PreviewCall
                 return;
             }
         }
-
+        pixels = new int[mPreviewSize.width * mPreviewSize.height];
         configureCameraParameters(cameraParams, portrait);
         mSurfaceConfiguring = false;
-
         try {
             mCamera.startPreview();
-
         } catch (Exception e) {
             Toast.makeText(mActivity, "Failed to start preview: " + e.getMessage(), Toast.LENGTH_LONG).show();
             Log.w(LOG_TAG, "Failed to start preview: " + e.getMessage());
@@ -78,13 +69,14 @@ public class ResizableCameraPreview extends CameraPreview implements PreviewCall
     public void onPreviewFrame(byte[] data, Camera camera) {
         // transforms NV21 pixel data into RGB pixels
         if(pixels==null )return;
-        decodeYUV420SP(pixels, data, parentWidth, parentHeight);
+        decodeYUV420SP(pixels, data, mPreviewSize.width, mPreviewSize.height);
+        mainActivity.setTv_color_HEX(Integer.toHexString(pixels[pixels.length / 2+mPreviewSize.height/2]));
         // Outuput the value of the top left pixel in the preview to LogCat
         //Log.i("Pixels", Integer.toHexString(pixels[0]));
-        mainActivity.setTv_color_HEX(Integer.toHexString(pixels[0]));
     }
+
     /**
-     * 
+     *
      * @param index selects preview size from the list returned by CameraPreview.getSupportedPreivewSizes().
      * @param width is the width of the available area for this view
      * @param height is the height of the available area for this view
@@ -103,7 +95,6 @@ public class ResizableCameraPreview extends CameraPreview implements PreviewCall
             mSurfaceConfiguring = true;
             return;
         }
-
         configureCameraParameters(cameraParams, portrait);
         try {
             mCamera.startPreview();
@@ -119,9 +110,7 @@ public class ResizableCameraPreview extends CameraPreview implements PreviewCall
 
     // Method from Ketai project! Not mine! See below...
     void decodeYUV420SP(int[] rgb, byte[] yuv420sp, int width, int height) {
-
         final int frameSize = width * height;
-
         for (int j = 0, yp = 0; j < height; j++) {
             int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
             for (int i = 0; i < width; i++, yp++) {
@@ -132,7 +121,6 @@ public class ResizableCameraPreview extends CameraPreview implements PreviewCall
                     v = (0xff & yuv420sp[uvp++]) - 128;
                     u = (0xff & yuv420sp[uvp++]) - 128;
                 }
-
                 int y1192 = 1192 * y;
                 int r = (y1192 + 1634 * v);
                 int g = (y1192 - 833 * v - 400 * u);
